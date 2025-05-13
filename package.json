@@ -8,7 +8,8 @@
     "@fastify/mongodb": "^9.0.2",
     "dotenv": "^16.5.0",
     "fastify": "^5.3.2",
-    "mongodb": "^6.16.0"
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.14.3"
   },
   "devDependencies": {
     "@babel/core": "^7.27.1",

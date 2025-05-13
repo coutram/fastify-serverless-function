@@ -1,8 +1,9 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
 import routes from './routes.js'
+import userRoutes from './routes/user.js'
 import cors from '@fastify/cors'
-import fastifyMongodb from '@fastify/mongodb';
+import { connectDB } from './mongo.js'
 
 dotenv.config()
 
@@ -17,15 +18,9 @@ app.register(cors, {
   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
 });
 
-app.register(fastifyMongodb, {
-  // force to close the mongodb connection when app stopped
-  // the default value is false
-  forceClose: true,
-  url: process.env.MONGO_URL
-})
-
 // Register routes
 app.register(routes)
+app.register(userRoutes)
 
 // Set default content type for all responses
 app.addHook('onSend', (request, reply, payload, done) => {
@@ -41,7 +36,13 @@ app.setErrorHandler((error, request, reply) => {
 });
 
 export default async function handler(req, reply) {
-  await app.ready()
-  app.server.emit('request', req, reply)
+  try {
+    await connectDB(); // Connect to the database
+    await app.ready(); // Ensure the Fastify app is ready
+    app.server.emit('request', req, reply); // Emit the request to the Fastify server
+} catch (error) {
+    console.error('Error in handler:', error);
+    reply.status(500).send({ status: 'error', message: 'Internal Server Error' });
+}
 }
 
