@@ -28,10 +28,18 @@ app.register(fastifyMongodb, {
 })
 
 // Register routes
-app.register(routes)
+// app.register(routes)
 
 
 export default async function handler(req, reply) {
   await app.ready()
   app.server.emit('request', req, reply)
 }
+
+const html = `
+  <html>
+    <body>
+      <h1>Hello World</h1>
+    </body>
+  </html>
+`
