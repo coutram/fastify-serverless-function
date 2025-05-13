@@ -54,7 +54,7 @@ export default async function routes(fastify, options) {
   });
 
   // Optionally, define a route to get a user by ID
-  fastify.get('/api/users/:id', async (request, reply) => {
+  fastify.get('/api/users/email/:email', async (request, reply) => {
     const userId = request.params.id;
     try {
       const user = await userModel.getByEmail(userId);
@@ -69,7 +69,7 @@ export default async function routes(fastify, options) {
   });
 
   // Optionally, define a route to get a user by ID
-  fastify.get('/api/users/:id', async (request, reply) => {
+  fastify.get('/api/users/wallet/:walletId', async (request, reply) => {
     const userId = request.params.id;
     try {
       const user = await userModel.getBygetByWalletIdId(userId);
