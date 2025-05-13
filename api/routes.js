@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongodb';
-import { registerUser, getUserByEmail, getUserByWalletId } from './controllers/userController.js';
+// import { ObjectId } from 'mongodb';
+// import { registerUser, getUserByEmail, getUserByWalletId } from './controllers/userController.js';
 import { UserModel } from './models/user.js';
 
 export default async function routes(fastify, options) {
@@ -17,21 +17,70 @@ export default async function routes(fastify, options) {
   });
 
   // User registration route
-  fastify.post('/api/user', registerUser(userModel));
-
-  fastify.get('/api/users/:id', getAllUserByID(userModel));
-
-  // GET user by email route
-  fastify.get('/api/user/email/:email', getUserByEmail(userModel));
-
-  // GET user by wallet ID route
-  fastify.get('/api/user/wallet/:walletId', getUserByWalletId(userModel));
-
-  // Example Fastify route for user creation
+  // Define a route to create a user
   fastify.post('/api/users', async (request, reply) => {
-    const { firstName, lastName, email, walletId } = request.body;
-    // Logic to create user in the database
-    // Return success or error response
+    const { name, email, walletId, firstName, lastName } = request.body;
+    try {
+      const newUser = await userModel.save({ name, email, walletId, firstName, lastName });
+      reply.status(201).send(newUser);
+    } catch (error) {
+      reply.status(500).send({ error: 'Failed to create user' });
+    }
+  });
+
+  // Define a route to get all users
+  fastify.get('/api/users', async (request, reply) => {
+    try {
+      const users = await userModel.getAll();
+      reply.send(users);
+    } catch (error) {
+      reply.status(500).send({ error: 'Failed to retrieve users' });
+    }
+  });
+
+  // Optionally, define a route to get a user by ID
+  fastify.get('/api/users/:id', async (request, reply) => {
+    const userId = request.params.id;
+    try {
+      const user = await userModel.getById(userId);
+      if (user) {
+        reply.send(user);
+      } else {
+        reply.status(404).send({ error: 'User not found' });
+      }
+    } catch (error) {
+      reply.status(500).send({ error: 'Failed to retrieve user' });
+    }
+  });
+
+  // Optionally, define a route to get a user by ID
+  fastify.get('/api/users/:id', async (request, reply) => {
+    const userId = request.params.id;
+    try {
+      const user = await userModel.getByEmail(userId);
+      if (user) {
+        reply.send(user);
+      } else {
+        reply.status(404).send({ error: 'User not found' });
+      }
+    } catch (error) {
+      reply.status(500).send({ error: 'Failed to retrieve user' });
+    }
+  });
+
+  // Optionally, define a route to get a user by ID
+  fastify.get('/api/users/:id', async (request, reply) => {
+    const userId = request.params.id;
+    try {
+      const user = await userModel.getBygetByWalletIdId(userId);
+      if (user) {
+        reply.send(user);
+      } else {
+        reply.status(404).send({ error: 'User not found' });
+      }
+    } catch (error) {
+      reply.status(500).send({ error: 'Failed to retrieve user' });
+    }
   });
 
   // Add more routes as needed
