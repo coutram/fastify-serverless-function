@@ -1,4 +1,4 @@
-import User from '../models/user.js';
+import UserModel from '../models/user.js'; // Use named import
 
 export const registerUser = async (userModel) => async (req, reply) => {
   const { name, email, walletId, firstName, lastName } = req.body;
@@ -49,6 +49,7 @@ export const getUserByEmail = async (userModel) => async (req, reply) => {
 };
 
 export const getUserByWalletId = async (userModel) => async (req, reply) => {
+  console.log('Received request to create user:', req.body); // Log the incoming request
   const { walletId } = req.params;
 
   try {

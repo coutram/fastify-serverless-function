@@ -10,15 +10,11 @@ const app = Fastify({
   logger: true,
 })
 
-app.get('/', async (req, reply) => {
-  return reply.status(200).type('text/html').send(html)
-})
-
 // Register the CORS plugin
 app.register(cors, {
   origin: '*', // Adjust this to your needs (e.g., specify allowed origins)
 })
-
+console.log(process.env.MONGO_URL)
 app.register(fastifyMongodb, {
   // force to close the mongodb connection when app stopped
   // the default value is false
@@ -34,10 +30,3 @@ export default async function handler(req, reply) {
   app.server.emit('request', req, reply)
 }
 
-const html = `
-  <html>
-    <body>
-      <h1>Hello World</h1>
-    </body>
-  </html>
-`
