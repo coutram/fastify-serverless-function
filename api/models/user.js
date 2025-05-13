@@ -1,6 +1,6 @@
 export class UserModel {
   constructor(mongoClient) {
-    this.collection = mongoClient.db.collection('users');
+    this.collection = mongoClient.db().collection('users');
   }
 
   // Define the user fields
