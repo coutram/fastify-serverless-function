@@ -23,13 +23,11 @@ app.register(fastifyMongodb, {
   // force to close the mongodb connection when app stopped
   // the default value is false
   forceClose: true,
-
   url: process.env.MONGO_URL
 })
 
 // Register routes
-// app.register(routes)
-
+app.register(routes)
 
 export default async function handler(req, reply) {
   await app.ready()
