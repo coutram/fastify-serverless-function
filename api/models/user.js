@@ -24,7 +24,6 @@ export default class UserModel {
 
   // Get all users from the database
   async getAll() {
-    console.log('Getting all users from the database:', this.collection);
     return await this.collection.find().toArray();
   }
 
