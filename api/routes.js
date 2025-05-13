@@ -7,7 +7,7 @@ export default async function routes(fastify, options) {
   // Create an instance of UserModel after MongoDB is ready
   let userModel;
 
-  app.after(() => {
+  fastify.after(() => {
     userModel = new UserModel(fastify.mongo.client);
   });
 
