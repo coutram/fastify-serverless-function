@@ -1,9 +1,12 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
-import routes from './routes.js'
-import userRoutes from './routes/user.js'
+
 import cors from '@fastify/cors'
 import { connectDB } from './mongo.js'
+
+import routes from './routes.js'
+import userRoutes from './routes/user.js'
+import campaignRoutes from './routes/campaign.js'
 
 dotenv.config()
 
@@ -21,6 +24,7 @@ app.register(cors, {
 // Register routes
 app.register(routes)
 app.register(userRoutes)
+app.register(campaignRoutes)
 
 // Set default content type for all responses
 app.addHook('onSend', (request, reply, payload, done) => {
