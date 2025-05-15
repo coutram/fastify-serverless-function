@@ -7,6 +7,7 @@ import { connectDB } from './mongo.js'
 import routes from './routes.js'
 import userRoutes from './routes/user.js'
 import campaignRoutes from './routes/campaign.js'
+import tweetsRoutes from './routes/tweets.js'
 
 dotenv.config()
 
@@ -25,6 +26,7 @@ app.register(cors, {
 app.register(routes)
 app.register(userRoutes)
 app.register(campaignRoutes)
+app.register(tweetsRoutes)
 
 // Set default content type for all responses
 app.addHook('onSend', (request, reply, payload, done) => {
@@ -44,9 +46,9 @@ export default async function handler(req, reply) {
     await connectDB(); // Connect to the database
     await app.ready(); // Ensure the Fastify app is ready
     app.server.emit('request', req, reply); // Emit the request to the Fastify server
-} catch (error) {
-    console.error('Error in handler:', error);
-    reply.status(500).send({ status: 'error', message: 'Internal Server Error' });
-}
+  } catch (error) {
+      console.error('Error in handler:', error);
+      reply.status(500).send({ status: 'error', message: 'Internal Server Error' });
+  }
 }
 

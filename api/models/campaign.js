@@ -9,10 +9,13 @@ const CampaignSchema = new mongoose.Schema({
     businessCategory: { type: String, required: true },
     productService: { type: String, required: true },
     budget: { type: Number, required: true },
+    twitterPost: { type: String },
+    emailContent: { type: String },
     campaignBrief: { type: String },
     briefGeneratedAt: { type: Date },
     briefApproved: { type: Boolean, default: false },
-    briefApprovedAt: { type: Date }
+    briefApprovedAt: { type: Date },
+    applicants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
 const Campaign = mongoose.model('Campaign', CampaignSchema);

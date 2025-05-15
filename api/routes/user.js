@@ -4,10 +4,10 @@ const User = require('../models/user'); // Adjust the path as necessary
 module.exports = async function (fastify, options) {
     // Endpoint to create a new user
     fastify.post('/api/users', async (request, reply) => {
-        const { firstName, lastName, email, walletId } = request.body;
+        const { firstName, lastName, email, walletId, role } = request.body;
 
         try {
-            const newUser = new User({ firstName, lastName, email, walletId });
+            const newUser = new User({ firstName, lastName, email, walletId, role });
             await newUser.save(); // Save the user to the database
 
             reply.status(201).send({
@@ -30,7 +30,7 @@ module.exports = async function (fastify, options) {
         try {
             const user = await User.findOne({ walletId }); // Use Mongoose to find the user
             if (!user) {
-                return reply.status(404).send({ status: 'error', message: 'User not found' });
+                return reply.status(200).send({ status: 'error', message: 'User not found', data: null });
             }
             reply.send({ status: 'success', data: user });
         } catch (error) {

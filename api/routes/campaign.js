@@ -1,5 +1,6 @@
 import Campaign from '../models/campaign.js'
-import { generateCampaignBrief } from '../services/openaiService.js'
+import { generateCampaignBrief, generateTwitterPost } from '../services/openaiService.js'
+import User from '../models/user.js'
 
 export default async function routes(fastify, options) {
 
@@ -15,10 +16,14 @@ export default async function routes(fastify, options) {
       // Generate brief asynchronously
       generateCampaignBrief(savedCampaign)
         .then(async (brief) => {
-          // Update the campaign with the generated brief
+          const twitterPost = await generateTwitterPost(savedCampaign);
+          // Update the campaign with the generated brief and twitter post
           await Campaign.findByIdAndUpdate(savedCampaign._id, {
             campaignBrief: brief,
-            briefGeneratedAt: new Date()
+            twitterPost,
+            briefGeneratedAt: new Date(),
+            briefApproved: false,
+            briefApprovedAt: null
           });
         })
         .catch(error => {
@@ -63,12 +68,14 @@ export default async function routes(fastify, options) {
 
       // Generate brief synchronously
       const brief = await generateCampaignBrief(campaign);
+      const twitterPost = await generateTwitterPost(campaign);
       
       // Update campaign with the new brief and reset approval
       const updatedCampaign = await Campaign.findByIdAndUpdate(
         campaign._id,
         {
           campaignBrief: brief,
+          twitterPost,
           briefGeneratedAt: new Date(),
           briefApproved: false,
           briefApprovedAt: null
@@ -164,6 +171,36 @@ export default async function routes(fastify, options) {
       );
 
       reply.send(updatedCampaign);
+    } catch (error) {
+      reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // Apply to a campaign
+  fastify.post('/api/campaigns/:id/apply', async (request, reply) => {
+    try {
+      const campaignId = request.params.id;
+      const { userId } = request.body; // The applicant's user ID
+
+      // Optionally, check if user exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return reply.code(404).send({ error: 'User not found' });
+      }
+
+      // Add user to applicants if not already applied
+      const campaign = await Campaign.findById(campaignId);
+      if (!campaign) {
+        return reply.code(404).send({ error: 'Campaign not found' });
+      }
+      if (campaign.applicants.includes(userId)) {
+        return reply.code(400).send({ error: 'Already applied' });
+      }
+
+      campaign.applicants.push(userId);
+      await campaign.save();
+
+      reply.send({ success: true, campaign });
     } catch (error) {
       reply.code(500).send({ error: error.message });
     }
