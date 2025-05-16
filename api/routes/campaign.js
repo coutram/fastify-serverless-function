@@ -176,6 +176,19 @@ export default async function routes(fastify, options) {
     }
   });
 
+
+  // Get all campaigns
+  fastify.get('/api/campaigns/invited/:walletId', async (request, reply) => {
+    try {
+      const user = await User.findOne({ walletId: request.params.walletId });
+      const campaigns = await Campaign.find({ applicants: { $in: [user._id] } });
+      reply.send(campaigns);
+    } catch (error) {
+      reply.code(500).send({ error: error.message });
+    }
+  });
+
+
   // Apply to a campaign
   fastify.post('/api/campaigns/:id/apply', async (request, reply) => {
     try {
