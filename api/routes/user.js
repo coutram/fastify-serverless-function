@@ -26,16 +26,32 @@ module.exports = async function (fastify, options) {
     // Endpoint to get user by wallet ID
     fastify.get('/api/users/wallet/:walletId', async (request, reply) => {
         const { walletId } = request.params;
+        console.log('Backend: Fetching user for wallet:', walletId);
 
         try {
             const user = await User.findOne({ walletId }); // Use Mongoose to find the user
+            console.log('Backend: Found user:', user);
+
             if (!user) {
-                return reply.status(200).send({ status: 'error', message: 'User not found', data: null });
+                console.log('Backend: No user found for wallet:', walletId);
+                return reply.status(200).send({ 
+                    status: 'error', 
+                    message: 'User not found', 
+                    data: null 
+                });
             }
-            reply.send({ status: 'success', data: user });
+
+            reply.send({ 
+                status: 'success', 
+                data: user 
+            });
         } catch (error) {
-            console.error('Error fetching user:', error);
-            reply.status(500).send({ status: 'error', message: 'Internal Server Error' });
+            console.error('Backend: Error fetching user:', error);
+            reply.status(500).send({ 
+                status: 'error', 
+                message: 'Internal Server Error',
+                error: error.message 
+            });
         }
     });
 };

@@ -1,39 +1,31 @@
 import Campaign from '../models/campaign.js'
 import { generateCampaignBrief, generateTwitterPost } from '../services/openaiService.js'
+import { uploadToStorage } from '../utils/storage.js'
 import User from '../models/user.js'
+import multipart from '@fastify/multipart'
 
 export default async function routes(fastify, options) {
+
+  // Register multipart plugin
+  await fastify.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+      files: 1
+    },
+    attachFieldsToBody: true
+  });
 
   // Create a new campaign first, then generate brief asynchronously
   fastify.post('/api/campaigns', async (request, reply) => {
     try {
+      // Handle regular JSON data
       const campaignData = request.body;
-      const campaign = new Campaign(campaignData);
-      
-      // Save the campaign immediately
-      const savedCampaign = await campaign.save();
-      
-      // Generate brief asynchronously
-      generateCampaignBrief(savedCampaign)
-        .then(async (brief) => {
-          const twitterPost = await generateTwitterPost(savedCampaign);
-          // Update the campaign with the generated brief and twitter post
-          await Campaign.findByIdAndUpdate(savedCampaign._id, {
-            campaignBrief: brief,
-            twitterPost,
-            briefGeneratedAt: new Date(),
-            briefApproved: false,
-            briefApprovedAt: null
-          });
-        })
-        .catch(error => {
-          console.error('Error generating brief:', error);
-          // You might want to log this error or handle it in some way
-        });
 
-      // Return the saved campaign immediately
+      const campaign = new Campaign(campaignData);
+      const savedCampaign = await campaign.save();
       reply.code(201).send(savedCampaign);
     } catch (error) {
+      console.error('Error creating campaign:', error);
       reply.code(500).send({ error: error.message });
     }
   });
@@ -122,16 +114,23 @@ export default async function routes(fastify, options) {
   // Update campaign
   fastify.put('/api/campaigns/:id', async (request, reply) => {
     try {
+      const campaignId = request.params.id;
+      
+      // Handle regular JSON update
+      const updateData = request.body;
+
       const campaign = await Campaign.findByIdAndUpdate(
-        request.params.id,
-        request.body,
+        campaignId,
+        updateData,
         { new: true, runValidators: true }
       );
+
       if (!campaign) {
         return reply.code(404).send({ error: 'Campaign not found' });
       }
       reply.send(campaign);
     } catch (error) {
+      console.error('Error updating campaign:', error);
       reply.code(500).send({ error: error.message });
     }
   });
@@ -216,6 +215,40 @@ export default async function routes(fastify, options) {
       reply.send({ success: true, campaign });
     } catch (error) {
       reply.code(500).send({ error: error.message });
+    }
+  });
+
+  // Update campaign icon
+  fastify.put('/api/campaigns/:id/icon', async (request, reply) => {
+    try {
+      console.log('About to get file...');
+      const data = await request.file();
+      console.log('File:', data);
+
+      console.log('About to get buffer...');
+      const buffer = await data.toBuffer();
+      console.log('Buffer:', buffer);
+
+      console.log('About to upload to S3...');
+      const s3Result = await uploadToStorage(buffer, data.filename, data.mimetype);
+      console.log('S3 result:', s3Result);
+
+      // Send response and return immediately
+      return reply.send({ status: 'success', url: s3Result.url });
+    } catch (err) {
+      console.error('Error in icon upload route:', err);
+      // Only send error if response not already sent
+      if (!reply.raw.writableEnded) {
+        return reply.status(500).send({ error: err.message });
+      }
+      // Otherwise, just log the error
+    }
+  });
+
+  fastify.setErrorHandler(function (error, request, reply) {
+    console.error('Fastify error handler:', error);
+    if (!reply.raw.writableEnded) {
+      reply.status(500).send({ error: error.message });
     }
   });
 

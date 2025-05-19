@@ -17,9 +17,10 @@ const app = Fastify({
 
 // Register the CORS plugin
 app.register(cors, {
-  origin: '*', // Allow requests from this origin
+  origin: 'http://localhost:3000', // Allow requests from this origin
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  credentials: true, // Allow credentials
 });
 
 // Register routes

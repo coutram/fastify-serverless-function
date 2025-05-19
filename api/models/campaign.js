@@ -9,6 +9,7 @@ const CampaignSchema = new mongoose.Schema({
     businessCategory: { type: String, required: true },
     productService: { type: String, required: true },
     budget: { type: Number, required: true },
+    icon: { type: String, required: false },
     twitterPost: { type: String },
     emailContent: { type: String },
     campaignBrief: { type: String },
