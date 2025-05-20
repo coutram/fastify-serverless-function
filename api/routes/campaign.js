@@ -1,6 +1,6 @@
 import Campaign from '../models/campaign.js'
 import { generateCampaignBrief, generateTwitterPost } from '../services/openaiService.js'
-import { User } from '../models/user.js'
+import User from '../models/user.js'
 
 export default async function routes(fastify, options) {
 

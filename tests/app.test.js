@@ -1,5 +1,5 @@
-const supertest = require('supertest');
-const createServer = require('../api'); // Adjust the path as necessary
+import supertest from 'supertest';
+import createServer from '../api/index.js';
 
 describe('User API', () => {
     let server;
