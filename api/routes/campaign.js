@@ -1,19 +1,8 @@
 import Campaign from '../models/campaign.js'
 import { generateCampaignBrief, generateTwitterPost } from '../services/openaiService.js'
-import { uploadToStorage } from '../utils/storage.js'
-import User from '../models/user.js'
-import multipart from '@fastify/multipart'
+import { User } from '../models/user.js'
 
 export default async function routes(fastify, options) {
-
-  // Register multipart plugin
-  await fastify.register(multipart, {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // 10MB
-      files: 1
-    },
-    attachFieldsToBody: true
-  });
 
   // Create a new campaign first, then generate brief asynchronously
   fastify.post('/api/campaigns', async (request, reply) => {
@@ -215,33 +204,6 @@ export default async function routes(fastify, options) {
       reply.send({ success: true, campaign });
     } catch (error) {
       reply.code(500).send({ error: error.message });
-    }
-  });
-
-  // Update campaign icon
-  fastify.put('/api/campaigns/:id/icon', async (request, reply) => {
-    try {
-      console.log('About to get file...');
-      const data = await request.file();
-      console.log('File:', data);
-
-      console.log('About to get buffer...');
-      const buffer = await data.toBuffer();
-      console.log('Buffer:', buffer);
-
-      console.log('About to upload to S3...');
-      const s3Result = await uploadToStorage(buffer, data.filename, data.mimetype);
-      console.log('S3 result:', s3Result);
-
-      // Send response and return immediately
-      return reply.send({ status: 'success', url: s3Result.url });
-    } catch (err) {
-      console.error('Error in icon upload route:', err);
-      // Only send error if response not already sent
-      if (!reply.raw.writableEnded) {
-        return reply.status(500).send({ error: err.message });
-      }
-      // Otherwise, just log the error
     }
   });
 
